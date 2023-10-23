@@ -5,7 +5,6 @@ let noteLength = 0;
 //the entire length of the song
 let songLength = 0;
 //the note number in MIDI CC
-var masterJson = [];
 var inputs = [];
 // BPM -> MS conversion
 const bpm = 120
@@ -16,6 +15,35 @@ const beatsPerSecond = bpm / 60;
 const msPerFrames = 1000 / (framesPerBeat * beatsPerSecond);
 //ms per bar
 const barLength = msPerFrames * framesPerBeat * 4
+
+var masterJson = {
+    "slug": "tutorial",
+    "composer": "COMPOSER",
+    "duration": songLength,
+    "bucket": "Original",
+    "scaleKey": "a",
+    "scaleType": "minor",
+    "guideStartOffset": 0,
+    "guide": [0],
+    "hasLocalizedBackingTrack": true,
+    "beatmaps": [],
+};
+var beatmaps = {
+    "slug": "signature",
+    "type": "Discrete",
+    "category": "Signature",
+    "difficulty": 3,
+    "instruments": [
+      "tutorial"
+    ],
+    "instrumentRequirements": [
+        "Melodic",
+        "Sustain"
+    ],
+    "events": [],
+    "inputs": [],
+    "laneCount": 5
+}
 
 function addNotes (start, duration, noteCCNumber){
     var notes
@@ -28,7 +56,6 @@ function addNotes (start, duration, noteCCNumber){
 fs.readFile('./midi.mid', 'base64', function (err,data){
     var midiArray = midiParser.parse(data);
     var noteCCNumber;
-    //console.log(midiArray)
     //for each event on the first track, find a noteOn message (type 9) and print "noteOn"
     midiArray.track[0].event.forEach(function(element){
         songLength += (element.deltaTime * msPerFrames);
@@ -49,8 +76,9 @@ fs.readFile('./midi.mid', 'base64', function (err,data){
 }
 )
 
-function writeJsonFile(inputs){
-    masterJson.push(inputs);
+function writeJsonFile(inputString){
+    beatmaps.inputs = inputString
+    masterJson.beatmaps = beatmaps;
     const data = JSON.stringify(masterJson, null, 2);
     fs.writeFile("config.json", data, (error) => {
         if (error) {

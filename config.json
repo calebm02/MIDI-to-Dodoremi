@@ -1,81 +1,107 @@
-[
-  [
-    {
-      "start": 0,
-      "lanes": [
-        5
-      ],
-      "notes": [
-        0,
-        0,
-        null
-      ]
-    },
-    {
-      "start": 0,
-      "lanes": [
-        5
-      ],
-      "notes": [
-        0,
-        250,
-        71
-      ]
-    },
-    {
-      "start": 0,
-      "lanes": [
-        5
-      ],
-      "notes": [
-        0,
-        250,
-        73
-      ]
-    },
-    {
-      "start": 0,
-      "lanes": [
-        5
-      ],
-      "notes": [
-        0,
-        250,
-        74
-      ]
-    },
-    {
-      "start": 0,
-      "lanes": [
-        5
-      ],
-      "notes": [
-        0,
-        250,
-        76
-      ]
-    },
-    {
-      "start": 0,
-      "lanes": [
-        5
-      ],
-      "notes": [
-        0,
-        0,
-        78
-      ]
-    },
-    {
-      "start": 0,
-      "lanes": [
-        5
-      ],
-      "notes": [
-        0,
-        250,
-        74
-      ]
-    }
-  ]
-]
+{
+  "slug": "tutorial",
+  "composer": "COMPOSER",
+  "duration": 0,
+  "bucket": "Original",
+  "scaleKey": "a",
+  "scaleType": "minor",
+  "guideStartOffset": 0,
+  "guide": [
+    0
+  ],
+  "hasLocalizedBackingTrack": true,
+  "beatmaps": {
+    "slug": "signature",
+    "type": "Discrete",
+    "category": "Signature",
+    "difficulty": 3,
+    "instruments": [
+      "tutorial"
+    ],
+    "instrumentRequirements": [
+      "Melodic",
+      "Sustain"
+    ],
+    "events": [],
+    "inputs": [
+      {
+        "start": 0,
+        "lanes": [
+          5
+        ],
+        "notes": [
+          0,
+          0,
+          null
+        ]
+      },
+      {
+        "start": 0,
+        "lanes": [
+          5
+        ],
+        "notes": [
+          0,
+          250,
+          71
+        ]
+      },
+      {
+        "start": 0,
+        "lanes": [
+          5
+        ],
+        "notes": [
+          0,
+          250,
+          73
+        ]
+      },
+      {
+        "start": 0,
+        "lanes": [
+          5
+        ],
+        "notes": [
+          0,
+          250,
+          74
+        ]
+      },
+      {
+        "start": 0,
+        "lanes": [
+          5
+        ],
+        "notes": [
+          0,
+          250,
+          76
+        ]
+      },
+      {
+        "start": 0,
+        "lanes": [
+          5
+        ],
+        "notes": [
+          0,
+          0,
+          78
+        ]
+      },
+      {
+        "start": 0,
+        "lanes": [
+          5
+        ],
+        "notes": [
+          0,
+          250,
+          74
+        ]
+      }
+    ],
+    "laneCount": 5
+  }
+}
