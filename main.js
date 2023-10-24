@@ -5,9 +5,9 @@
 - devise a system to make pitches move up/down lanes?
 */
 
-let midiParser = require('midi-parser-js-4.0.4');
-let fs = require('fs');
-let songLength = 0; //song length in ms
+var midiParser = require('midi-parser-js-4.0.4');
+var fs = require('fs');
+var songLength = 0; //song length in ms
 var allCharts = []; //array of curChart
 var curChart = []; //temp variable that contains lines of jackbox's "input" string, for the current track being processed
 // BPM -> ms conversion
@@ -109,13 +109,6 @@ var otherJsonstuff =
 //reads the midi file and parses it at base64
 fs.readFile('midis/cmajorscale.mid', 'base64', function (err,data){
     var midiArray = midiParser.parse(data);
-
-    //print out translated midi (debug purposes)
-    console.log(midiArray);
-    midiArray.track[0].event.forEach(function(element){
-      console.log(element);
-    });
-
     midiArray.track.forEach(function(element, index){
         getInformation(element, index);
     });
