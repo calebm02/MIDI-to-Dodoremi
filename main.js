@@ -2,6 +2,7 @@
 - figure out difficulty with some sort of weighing system
 - add held notes
 - devise a system to make pitches move up/down lanes? (maybe done)
+- auto lanes may need to be tweaked as they are currently directly based on the amount of notes in a song.
 */
 
 var midiParser = require('midi-parser-js-4.0.4');
