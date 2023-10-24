@@ -207,7 +207,7 @@ function writeJsonFile(){
     mapNotesToLanes();
     // go through and assign the lanes to each note
     allCharts[0].forEach(function(element, index){
-      element.lanes[0] = noteMap.get(element.notes[0].note) + 1 //offset for arrays being 0 normaled
+      element.lanes[0] = noteMap.get(element.notes[0].note);
     })
     //now assign each track to the masterJson file
     allCharts.forEach(function(element, index){
