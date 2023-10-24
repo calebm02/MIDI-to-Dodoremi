@@ -196,8 +196,12 @@ function mapNotesToLanes(){
   notesInSongArray.sort(function(a, b) {
     return a - b;
   });
+
   for (var b = 0; b < notesInSongArray.length; b++){
-    noteMap.set(notesInSongArray[b], b);
+    for (var i = 0; i < Math.ceil(notesInSongArray.length / beatmaps.laneCount); i++){
+      console.debug(Math.ceil(notesInSongArray.length / beatmaps.laneCount))
+      noteMap.set(notesInSongArray[b], b);
+    }
   }
 }
 
