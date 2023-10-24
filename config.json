@@ -22,7 +22,7 @@
       "category": "Signature",
       "difficulty": 3,
       "instruments": [
-        "tutorial"
+        "guitar-metal-notes"
       ],
       "instrumentRequirements": [
         "Melodic",
@@ -33,7 +33,7 @@
         {
           "start": 0,
           "lanes": [
-            1
+            0
           ],
           "notes": [
             {
@@ -46,7 +46,7 @@
         {
           "start": 250,
           "lanes": [
-            1
+            0
           ],
           "notes": [
             {
@@ -59,7 +59,7 @@
         {
           "start": 500,
           "lanes": [
-            1
+            0
           ],
           "notes": [
             {
@@ -72,7 +72,7 @@
         {
           "start": 750,
           "lanes": [
-            1
+            0
           ],
           "notes": [
             {
@@ -85,7 +85,7 @@
         {
           "start": 1000,
           "lanes": [
-            1
+            0
           ],
           "notes": [
             {
@@ -98,7 +98,7 @@
         {
           "start": 1250,
           "lanes": [
-            1
+            0
           ],
           "notes": [
             {
@@ -111,7 +111,7 @@
         {
           "start": 1500,
           "lanes": [
-            1
+            0
           ],
           "notes": [
             {
@@ -124,7 +124,7 @@
         {
           "start": 1750,
           "lanes": [
-            1
+            0
           ],
           "notes": [
             {
@@ -135,7 +135,7 @@
           ]
         }
       ],
-      "laneCount": 5
+      "laneCount": 1
     }
   ],
   "preferredAssignments": [

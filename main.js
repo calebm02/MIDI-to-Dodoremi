@@ -39,7 +39,7 @@ var beatmaps = {
     "category": "Signature",
     "difficulty": 3,
     "instruments": [
-      "tutorial"
+      "guitar-metal-notes"
     ],
     "instrumentRequirements": [
         "Melodic",
@@ -47,7 +47,7 @@ var beatmaps = {
     ],
     "events": [],
     "inputs": [],
-    "laneCount": 5
+    "laneCount": 1
 }
 
 var otherJsonstuff =
