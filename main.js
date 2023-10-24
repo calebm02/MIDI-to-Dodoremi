@@ -1,17 +1,16 @@
+/*TODO:
+- figure out difficulty with some sort of weighing system
+- get the lane count automatically
+- add held notes
+- devise a system to make pitches move up/down lanes?
+*/
 
-//figure out difficulty with some sort of weighing system
-//get the lane count automatically
-//add in the guides
-//get data from multiple tracks
-
-let midiParser  = require('midi-parser-js-4.0.4');
+let midiParser = require('midi-parser-js-4.0.4');
 let fs = require('fs');
-//the entire length of the song
-let songLength = 0;
-//the note number in MIDI CC
-var inputs = [];
-var guidesArray = [];
-// BPM -> MS conversion
+let songLength = 0; //song length in ms
+var allCharts = []; //array of curChart
+var curChart = []; //temp variable that contains lines of jackbox's "input" string, for the current track being processed
+// BPM -> ms conversion
 const bpm = 120
 const framesPerBeat = 96;
 //converts BPM to beats per second
@@ -24,7 +23,7 @@ const barLength = msPerFrames * framesPerBeat * 4
 
 var masterJson = {
     "slug": "tutorial",
-    "composer": "COMPOSER",
+    "composer": "Cameron C. Major",
     "duration": songLength,
     "bucket": "Original",
     "scaleKey": "a",
@@ -51,7 +50,8 @@ var beatmaps = {
     "laneCount": 5
 }
 
-var otherJsonstuff ={"preferredAssignments": [
+var otherJsonstuff =
+    [
     [
       "melody",
       "guitar-metal-notes"
@@ -104,40 +104,37 @@ var otherJsonstuff ={"preferredAssignments": [
       "counter-melody",
       "taz-the-cat"
     ]
-  ]
-}
+    ]
 
-function addNotes (start, duration, noteCCNumber){
-    var notePosition = [
-        {start: Math.round(start), lanes:[1], notes: [{"start": 0,"duration": Math.round(duration),"note": Math.round(noteCCNumber)}]},
-    ];
-    inputs = inputs.concat(notePosition);
-}
 //reads the midi file and parses it at base64
-fs.readFile('./midi.mid', 'base64', function (err,data){
+fs.readFile('midis/cmajorscale.mid', 'base64', function (err,data){
     var midiArray = midiParser.parse(data);
-    getInformation(midiArray);
-}
-)
+
+    //print out translated midi (debug purposes)
+    console.log(midiArray);
+    midiArray.track[0].event.forEach(function(element){
+      console.log(element);
+    });
+
+    midiArray.track.forEach(function(element, index){
+        getInformation(element, index);
+    });
+    writeJsonFile();
+});
 
 //gets actual chart information from midi
-function getInformation(midiArray){
+function getInformation(track, trackNum){
+    songLength = 0;
     var noteCCNumber = [];
     var noteLength = [];
     var startPoint = [];
-    console.log(midiArray.track[0].event[6]);
-    //for each event on the first track, find a noteOn message (type 9)
-    midiArray.track[0].event.forEach(function(element){
-        if(element.deltaTime != 0){
-            songLength += (element.deltaTime * msPerFrames);
-        }
-
-        
-
+    //for each event on the track, add deltaTime and if noteOn/noteOff, add necessary information to the curChart array
+    track.event.forEach(function(element){
+        songLength += (element.deltaTime * msPerFrames);   
         let i = 0;
-        noteCCNumber.forEach(function(index){
-                noteLength[i] += (element.deltaTime * msPerFrames);
-                i++
+        noteCCNumber.forEach(function(){
+            noteLength[i] += (element.deltaTime * msPerFrames);
+            i++;
         })
 
         //if the event is a noteOn add the length, start, and note number to the array
@@ -146,11 +143,12 @@ function getInformation(midiArray){
             noteCCNumber.push(element.data[0]);
             noteLength.push(0);
             startPoint.push(songLength);
+        //if the event is a noteOff
         }else if (element.type == 8) {
             let i = 0;
             noteCCNumber.forEach(function(index){
                 if (index == element.data[0]){
-                    addNotes(startPoint[i], noteLength[i], noteCCNumber[i]);
+                    addNotes(startPoint[i], noteLength[i], noteCCNumber[i], trackNum);
                     //resets the note length when the next note starts
                     noteLength.splice(i, 1);
                     noteCCNumber.splice(i, 1);
@@ -160,33 +158,36 @@ function getInformation(midiArray){
             })
         }
     });
-    writeJsonFile(inputs);
+    allCharts.push(curChart);
+    curChart = [];
 }
 
-function createGuides(){
+function addNotes (start, duration, noteCCNumber){
+    var notePosition = [
+        {start: Math.round(start), lanes:[1], notes: [{"start": 0,"duration": Math.round(duration),"note": Math.round(noteCCNumber)}]},
+    ];
+    curChart = curChart.concat(notePosition);
+}
+
+function createGuides(){ //note this function assumes 4/4 time
     const songBarLength = (songLength / barLength);
-    let b = 0;
-    let every4bars = 0;
-        for (let i = 0; i < songBarLength; i++){
-            guidesArray[b] = barLength * i;
-            b++
-            if (b > 3 || i == songBarLength - 1){
-                guidesArray.sort(function(a, b){
-                    return a - b;
-                });
-                masterJson.guide[every4bars] = guidesArray;
-                every4bars++
-                b = 0;
-                guidesArray = [];
-            }
-        }
-
+    const setsof4 = Math.floor((songBarLength+3)/4);
+    var guideArray = new Array(setsof4);
+    for (let i = 0; i < setsof4; i++) {
+        guideArray[i] = new Array(4);
+    }
+    for (let i = 0; i < setsof4*4; i++){
+        guideArray[Math.floor(i/4)][i%4] = barLength * i / 4;
+    }
+    masterJson.guide = guideArray;
 }
 
-function writeJsonFile(inputString){
+function writeJsonFile(){
     createGuides();
-    beatmaps.inputs = inputString
-    masterJson.beatmaps[0] = beatmaps;
+    allCharts.forEach(function(element, index){
+        beatmaps.inputs = element;
+        masterJson.beatmaps[index] = beatmaps;
+    });
     masterJson.duration = Math.round(songLength);
     masterJson.preferredAssignments = otherJsonstuff;
     const data = JSON.stringify(masterJson, null, 2);
@@ -197,6 +198,3 @@ function writeJsonFile(inputString){
         }
     });
 }
-
-
-
