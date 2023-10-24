@@ -40,7 +40,7 @@ var beatmaps = {
     "category": "Signature",
     "difficulty": 3,
     "instruments": [
-      "tutorial"
+      "guitar-metal-notes"
     ],
     "instrumentRequirements": [
         "Melodic",
@@ -48,7 +48,7 @@ var beatmaps = {
     ],
     "events": [],
     "inputs": [],
-    "laneCount": 5
+    "laneCount": 1
 }
 
 var otherJsonstuff ={"preferredAssignments": [
@@ -109,7 +109,7 @@ var otherJsonstuff ={"preferredAssignments": [
 
 function addNotes (start, duration, noteCCNumber){
     var notePosition = [
-        {start: Math.round(start), lanes:[1], notes: [{"start": 0,"duration": Math.round(duration),"note": Math.round(noteCCNumber)}]},
+        {start: Math.round(start), lanes:[0], notes: [{"start": 0,"duration": Math.round(duration),"note": Math.round(noteCCNumber)}]},
     ];
     inputs = inputs.concat(notePosition);
 }
