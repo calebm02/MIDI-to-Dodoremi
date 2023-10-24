@@ -9,7 +9,9 @@ var fs = require('fs');
 var songLength = 0; //song length in ms
 var allCharts = []; //array of curChart
 var curChart = []; //temp variable that contains lines of jackbox's "input" string, for the current track being processed
+//the set of all notes in the song
 var notesInSong = new Set();
+//the map of notes to lanes
 var noteMap = new Map();
 // BPM -> ms conversion
 const bpm = 120
@@ -177,9 +179,14 @@ function createGuides(){ //note this function assumes 4/4 time
     }
     masterJson.guide = guideArray;
 }
+//adds lanes based on the amount of unique notes
 function addLanes(voiceCount){
   if(beatmaps.laneCount < voiceCount){
     beatmaps.laneCount = voiceCount;
+  }
+  //overflow protection
+  if (voiceCount > 6){
+    voiceCount = 6;
   }
 }
 
