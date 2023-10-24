@@ -1,8 +1,7 @@
 /*TODO:
 - figure out difficulty with some sort of weighing system
-- get the lane count automatically
 - add held notes
-- devise a system to make pitches move up/down lanes?
+- devise a system to make pitches move up/down lanes? (maybe done)
 */
 
 var midiParser = require('midi-parser-js-4.0.4');
@@ -10,6 +9,8 @@ var fs = require('fs');
 var songLength = 0; //song length in ms
 var allCharts = []; //array of curChart
 var curChart = []; //temp variable that contains lines of jackbox's "input" string, for the current track being processed
+var notesInSong = new Set();
+var noteMap = new Map();
 // BPM -> ms conversion
 const bpm = 120
 const framesPerBeat = 96;
@@ -107,7 +108,7 @@ var otherJsonstuff =
     ]
 
 //reads the midi file and parses it at base64
-fs.readFile('midis/cmajorscale.mid', 'base64', function (err,data){
+fs.readFile('midis/billiejean.mid', 'base64', function (err,data){
     var midiArray = midiParser.parse(data);
     midiArray.track.forEach(function(element, index){
         getInformation(element, index);
@@ -142,6 +143,8 @@ function getInformation(track, trackNum){
             noteCCNumber.forEach(function(index){
                 if (index == element.data[0]){
                     addNotes(startPoint[i], noteLength[i], noteCCNumber[i], trackNum);
+                    //add the midi note to a set
+                    notesInSong.add(noteCCNumber[i]);
                     //resets the note length when the next note starts
                     noteLength.splice(i, 1);
                     noteCCNumber.splice(i, 1);
@@ -174,13 +177,36 @@ function createGuides(){ //note this function assumes 4/4 time
     }
     masterJson.guide = guideArray;
 }
+function addLanes(voiceCount){
+  if(beatmaps.laneCount < voiceCount){
+    beatmaps.laneCount = voiceCount;
+  }
+}
+
+function mapNotesToLanes(){
+  var notesInSongArray = Array.from(notesInSong);
+  notesInSongArray.sort(function(a, b) {
+    return a - b;
+  });
+  for (var b = 0; b < notesInSongArray.length; b++){
+    noteMap.set(notesInSongArray[b], b);
+  }
+}
 
 function writeJsonFile(){
+    addLanes(notesInSong.size);
     createGuides();
+    mapNotesToLanes();
+    // go through and assign the lanes to each note
+    allCharts[0].forEach(function(element, index){
+      element.lanes[0] = noteMap.get(element.notes[0].note) + 1 //offset for arrays being 0 normaled
+    })
+    //now assign each track to the masterJson file
     allCharts.forEach(function(element, index){
         beatmaps.inputs = element;
         masterJson.beatmaps[index] = beatmaps;
     });
+
     masterJson.duration = Math.round(songLength);
     masterJson.preferredAssignments = otherJsonstuff;
     const data = JSON.stringify(masterJson, null, 2);
