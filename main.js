@@ -10,10 +10,14 @@ var fs = require('fs');
 var songLength = 0; //song length in ms
 var allCharts = []; //array of curChart
 var curChart = []; //temp variable that contains lines of jackbox's "input" string, for the current track being processed
-//the set of all notes in the song
-var notesInSong = new Set();
-//the map of notes to lanes
-var noteMap = new Map();
+
+var notesInSong = new Set(); //the set of all notes in the song
+var noteMap = new Map(); //the map of notes to lanes
+
+var difficulties = []; //difficulty for each track
+var startPointsAll = []; //all start points for the current track
+var maxNPS = [0,0,0]; //max notes per second over 1s, 5s, and 30s periods
+
 // BPM -> ms conversion
 const bpm = 120
 const framesPerBeat = 96;
@@ -122,10 +126,11 @@ fs.readFile('midis/billiejean.mid', 'base64', function (err,data){
 //gets actual chart information from midi
 function getInformation(track, trackNum){
     songLength = 0;
+    //temp arrays that hold notes that are noteOn but not noteOff yet
     var noteCCNumber = [];
     var noteLength = [];
     var startPoint = [];
-    //for each event on the track, add deltaTime and if noteOn/noteOff, add necessary information to the curChart array
+    //for each event on the track, add deltaTime, and check for noteOn/noteOff
     track.event.forEach(function(element){
         songLength += (element.deltaTime * msPerFrames);   
         let i = 0;
@@ -136,10 +141,10 @@ function getInformation(track, trackNum){
 
         //if the event is a noteOn add the length, start, and note number to the array
         if(element.type == 9){
-            //this outputs the midi CC note
             noteCCNumber.push(element.data[0]);
-            noteLength.push(0);
+            noteLength.push(0); //if we add held notes, need to change this.
             startPoint.push(songLength);
+			startPointsAll.push(songLength);
         //if the event is a noteOff
         }else if (element.type == 8) {
             let i = 0;
@@ -159,6 +164,8 @@ function getInformation(track, trackNum){
     });
     allCharts.push(curChart);
     curChart = [];
+	difficulties.push(calculateDifficulty(startPointsAll));
+	startPointsAll = [];
 }
 
 function addNotes (start, duration, noteCCNumber){
@@ -170,7 +177,7 @@ function addNotes (start, duration, noteCCNumber){
 
 function createGuides(){ //note this function assumes 4/4 time
     const songBarLength = (songLength / barLength);
-    const setsof4 = Math.floor((songBarLength+3)/4);
+    const setsof4 = Math.floor((songBarLength+3)/4)*4;
     var guideArray = new Array(setsof4);
     for (let i = 0; i < setsof4; i++) {
         guideArray[i] = new Array(4);
@@ -209,16 +216,16 @@ function writeJsonFile(){
     addLanes(notesInSong.size);
     createGuides();
     mapNotesToLanes();
-    // go through and assign the lanes to each note
+    //go through and assign the lanes to each note
     allCharts[0].forEach(function(element, index){
       element.lanes[0] = noteMap.get(element.notes[0].note);
     })
-    //now assign each track to the masterJson file
+    //assign each track to the masterJson file
     allCharts.forEach(function(element, index){
         beatmaps.inputs = element;
+		beatmaps.difficulty = difficulties[index];
         masterJson.beatmaps[index] = beatmaps;
     });
-
     masterJson.duration = Math.round(songLength);
     masterJson.preferredAssignments = otherJsonstuff;
     const data = JSON.stringify(masterJson, null, 2);
@@ -228,4 +235,23 @@ function writeJsonFile(){
             throw error;
         }
     });
+}
+
+//input a list of startPoints and a period, returns the max amount of startPoints that occured within that period anywhere in the list.
+function maxNotesInTime(notes, period){
+	var curMax = 0;
+	var backIndex = 0;
+	for(let i = 0; i < notes.length; i++){
+		while((notes[i] - notes[backIndex]) > period){
+			backIndex++;
+		}
+		curMax = Math.max(curMax, i-backIndex);
+	}
+	console.log("max notes in", period, "ms was", curMax);
+	return curMax;
+}
+
+//formula is 10*maxNotes(1s)+4*maxNotes(5s)+maxNotes(30s), /40 and rounded down. these constants can be changed if we feel like it
+function calculateDifficulty(notes){
+	return Math.floor((10*maxNotesInTime(notes, 1000) + 3.5*maxNotesInTime(notes, 5000) + maxNotesInTime(notes, 30000))/40);
 }
